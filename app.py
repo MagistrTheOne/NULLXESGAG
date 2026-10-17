@@ -33,6 +33,7 @@ sections = ["Overview", "Market Explorer", "Asset Forecast", "Macro Intelligence
             "Backtest Laboratory", "Model Registry", "Data Sources"]
 section = st.sidebar.radio("RESEARCH TERMINAL", sections)
 store_path = Path(st.sidebar.text_input("PARQUET LAKE", os.environ.get("GAGCAP_LAKE_PATH", "data/lake/observations.parquet")))
+report_path = Path(os.environ.get("GAGCAP_REPORT_PATH", str(store_path.parent.parent / "reports" / "analysis.md")))
 
 if not store_path.is_file():
     st.warning("DATA_UNAVAILABLE · No persisted provider observations found at the configured path.")
@@ -55,7 +56,13 @@ if frame.empty:
     st.stop()
 
 st.subheader(section.upper())
-if section in {"Overview", "Market Explorer", "Macro Intelligence", "Central Bank Monitor"}:
+if section == "Overview":
+    if report_path.is_file():
+        st.markdown(report_path.read_text(encoding="utf-8"))
+    else:
+        st.warning("DATA_UNAVAILABLE · No saved analytical report.")
+    st.caption(f"REAL OBSERVATIONS: {len(frame):,} · SOURCES: {', '.join(sorted(frame['source'].astype(str).unique()))}")
+elif section in {"Market Explorer", "Macro Intelligence", "Central Bank Monitor"}:
     ids = sorted(frame["series_id"].astype(str).unique().tolist())
     selected = st.selectbox("SERIES", ids)
     current = frame[frame["series_id"].astype(str) == selected].sort_values("observation_date")
@@ -82,6 +89,24 @@ elif section == "Data Sources":
     st.dataframe(frame.groupby(["source", "series_id", "unit"], as_index=False).agg(
         observations=("value", "count"), first_observation=("observation_date", "min"),
         latest_observation=("observation_date", "max")), use_container_width=True, hide_index=True)
+elif section == "Risk Analytics":
+    risk_path = Path(os.environ.get("GAGCAP_RISK_PATH", str(store_path.parent.parent / "risk" / "risk_metrics.parquet")))
+    if risk_path.is_file():
+        risk = pd.read_parquet(risk_path)
+        st.dataframe(risk, use_container_width=True, hide_index=True)
+    else:
+        st.warning("DATA_UNAVAILABLE · Risk metrics have not been calculated from real observations.")
+elif section == "GEO-RISK":
+    geo_path = Path(os.environ.get("GAGCAP_GEO_PATH", str(store_path.parent.parent / "geo" / "geo_events.parquet")))
+    if geo_path.is_file():
+        events = pd.read_parquet(geo_path)
+        if events.empty:
+            st.warning("DATA_UNAVAILABLE · No source-backed events were extracted.")
+        else:
+            st.dataframe(events, use_container_width=True, hide_index=True, column_config={
+                "source_url": st.column_config.LinkColumn("SOURCE DOCUMENT")})
+    else:
+        st.warning("DATA_UNAVAILABLE · No source-backed geopolitical events were extracted.")
 else:
     st.info("DATA_UNAVAILABLE · This view requires separately persisted, validated records.")
 
