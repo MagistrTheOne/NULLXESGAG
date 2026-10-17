@@ -1,0 +1,18 @@
+providers:
+  cbr:
+    enabled: true
+    endpoint: https://www.cbr.ru/DailyInfoWebServ/DailyInfo.asmx/KeyRateXML
+    series: [key_rate]
+    caveat: "Daily key-rate history has no complete publication timestamp or broad macro release vintages."
+  moex:
+    enabled: true
+    endpoint: https://iss.moex.com/iss
+    series: [IMOEX, SBER, SU26238RMFS4]
+    caveat: "MOEX licensing must be reviewed; candles are provider close, not total return adjusted."
+  fred:
+    enabled: true
+    endpoint: https://api.stlouisfed.org/fred/series/observations
+    api_key_env: FRED_API_KEY
+    vintage_endpoint: ALFRED realtime_start/realtime_end parameters
+    revisions: "Retain observation_date, available_at, vintage_date and input_data_version."
+    caveat: "No FRED data is available until the operator configures an API key."

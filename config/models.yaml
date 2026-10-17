@@ -1,0 +1,19 @@
+forecasting:
+  research_only: true
+  horizons_calendar_days: [7, 30, 90]
+  sessions_per_year_convention: 252
+  calendar_mapping: "round(calendar_days * 252 / 365.25); approximation, not exchange calendar"
+  implemented_baselines: [random_walk, historical_mean]
+  backtest_windows: [expanding, rolling]
+  point_in_time_requirement: "Features must be filtered by available_at <= forecast origin; revised observations selected by vintage."
+  forecast_metadata: [model_id, forecast_origin, target_date, horizon, point_estimate, interval, input_data_version]
+  risk_distributions:
+    monte_carlo: "normal IID log-return increments, exponentiated; explicit assumption"
+  qwen:
+    model_repository: "Qwen/Qwen3-0.6B-GGUF"
+    runtime: llama.cpp
+    gpu_layers: 0
+    model_path_env: QWEN_GGUF_PATH
+    missing_model_status: QWEN_UNAVAILABLE
+    confidence: UNCALIBRATED
+  trading: disabled

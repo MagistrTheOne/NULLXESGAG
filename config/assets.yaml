@@ -1,0 +1,25 @@
+assets:
+  - id: IMOEX
+    provider: moex
+    secid: IMOEX
+    engine: stock
+    market: index
+    board: SNDX
+    unit: index_points
+  - id: SBER
+    provider: moex
+    secid: SBER
+    engine: stock
+    market: shares
+    board: TQBR
+    unit: RUB_per_share
+  - id: SU26238RMFS4
+    provider: moex
+    secid: SU26238RMFS4
+    engine: stock
+    market: bonds
+    board: TQOB
+    unit: provider_close_price
+  - id: key_rate
+    provider: cbr
+    unit: percent
